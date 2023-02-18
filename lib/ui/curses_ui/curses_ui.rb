@@ -1,7 +1,7 @@
 require "curses"
 include Curses
 
-class AsciiUi
+class CursesUi
   # render in order from RenderOrder
   
   def new
@@ -10,9 +10,9 @@ class AsciiUi
   def render_entities(entities)
     entities.each do |entity|
       setpos(entity.y, entity.x)
-      Curses.attron(color_pair(entity.color))
-      addch(entity.char)
-      Curses.attroff(color_pair(entity.color))
+      attrset(color_pair(entity.color))
+      addch(entity.char)  
+      # Curses.attroff(color_pair(entity.color))
     end
   end
 
@@ -22,4 +22,5 @@ class AsciiUi
       addch(" ")
     end
   end
-end
+    
+end 

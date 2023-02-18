@@ -26,4 +26,9 @@ class Entity
   def name
     @name
   end
+
+  def move dx, dy
+    @x += dx
+    @y += dy
+  end
 end
