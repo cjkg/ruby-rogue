@@ -1,3 +1,7 @@
+require_relative "../utils/map_utils"
+
+include MapUtils
+
 class Entity
   def initialize x, y, char, color, name
     @x = x
@@ -30,5 +34,9 @@ class Entity
   def move dx, dy
     @x += dx
     @y += dy
+  end
+
+  def can_move?(dx, dy)
+    in_bounds?(dx, dy)
   end
 end

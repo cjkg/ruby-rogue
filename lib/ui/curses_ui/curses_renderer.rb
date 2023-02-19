@@ -12,14 +12,15 @@ class CursesRenderer
       attrset(color_pair(entity.color))
       setpos(entity.y, entity.x)
       addch(entity.char)
+      attroff(color_pair(entity.color))
     end
   end
 
   def clear_entities(entities)
     entities.each do |entity|
       setpos(entity.y, entity.x)
+      attron(color_pair(0))
       addch(" ")
     end
   end
-    
-end 
+end
