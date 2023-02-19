@@ -58,8 +58,8 @@ begin
 
   while true do
     action = input.handle_keys
-    move = action["move"] || nil
-    quit = action["quit"] || nil
+    move = action["move"]
+    quit = action["quit"]
 
     if move
       player.move(move["dx"], move["dy"])

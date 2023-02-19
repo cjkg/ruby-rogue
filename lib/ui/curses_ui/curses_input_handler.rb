@@ -15,6 +15,8 @@ class CursesInputHandler
       {"move" => {"dx" => 1, "dy" => 0}}
     when "q"
       {"quit" => true}
+    else
+      {}
     end
     output
   end
