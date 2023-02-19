@@ -1,6 +1,7 @@
 require_relative "./utils/rng/die"
 require_relative "./utils/rng/bag"
-require "./ui/curses_ui/curses_ui"
+require "./ui/curses_ui/curses_renderer"
+require "./ui/curses_ui/curses_input_handler"
 require "./entity/player"
 
 require "curses"
@@ -12,7 +13,8 @@ init_screen
 start_color
 curs_set(0)
 noecho
-ui = CursesUi.new
+renderer = CursesRenderer.new
+input = CursesInputHandler.new
 CUSTOM_YELLOW = 11
 CUSTOM_RED = 196
 CUSTOM_DARK_RED = 124
@@ -52,11 +54,22 @@ begin
   start_x = 10
   start_y = 10
   player = Player.new(start_x, start_y, "@", 0, "Hero")
-
   entities = [player]
 
-  while getch != "q" do
-    ui.render_entities(entities)
+  while true do
+    action = input.handle_keys
+    move = action["move"] || nil
+    quit = action["quit"] || nil
+
+    if move
+      player.move(move["dx"], move["dy"])
+    elsif quit
+      break
+    end
+
+    if action
+      renderer.render_entities(entities)
+    end
   end
 
 ensure

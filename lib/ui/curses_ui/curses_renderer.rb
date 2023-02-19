@@ -1,7 +1,7 @@
 require "curses"
 include Curses
 
-class CursesUi
+class CursesRenderer
   # render in order from RenderOrder
   
   def new
@@ -9,10 +9,9 @@ class CursesUi
   
   def render_entities(entities)
     entities.each do |entity|
-      setpos(entity.y, entity.x)
       attrset(color_pair(entity.color))
-      addch(entity.char)  
-      # Curses.attroff(color_pair(entity.color))
+      setpos(entity.y, entity.x)
+      addch(entity.char)
     end
   end
 
