@@ -1,4 +1,4 @@
 require_relative "./entity"
 
-class Player < Entity 
+class Player < Entity
 end
