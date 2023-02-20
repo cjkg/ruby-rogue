@@ -39,4 +39,8 @@ class Entity
   def can_move?(dx, dy)
     in_bounds?(dx, dy)
   end
+
+  def set_color color
+    @color = color
+  end
 end

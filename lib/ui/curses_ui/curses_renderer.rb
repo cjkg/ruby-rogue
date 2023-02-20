@@ -23,4 +23,16 @@ class CursesRenderer
       addch(" ")
     end
   end
+
+  def render_map(map)
+    map.tiles.each_with_index do |row, y|
+      row.each_with_index do |tile, x|
+        setpos(y, x)
+        attron(color_pair(tile.color))
+        addch(tile.char)
+      end
+    end
+  end
+
+  # TODO: abstract away the Curses calls for character painting
 end
