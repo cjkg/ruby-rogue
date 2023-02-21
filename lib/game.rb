@@ -14,6 +14,8 @@ MAP_HEIGHT = 24
 
 init_screen
 start_color
+# use_default_colors
+
 curs_set(0)
 noecho
 initialize_colors # TODO: Why is this not working?

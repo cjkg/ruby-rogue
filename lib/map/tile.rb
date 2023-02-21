@@ -1,5 +1,5 @@
 class Tile
-  def initialize(char, walkable=true, blocks_sight=false, color=7)
+  def initialize(char, walkable=true, blocks_sight=false, color=COLOR_WHITE, dark_color=COLOR_BLACK)
     @char = char
     @walkable = walkable
     @blocks_sight = blocks_sight
