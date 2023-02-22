@@ -50,7 +50,6 @@ class ShadowCast
     
       # Mark the cell as visible and call the block if provided
       @map.get_tile(cell_x, cell_y).set_fov(true)
-      jeff = @map.get_tile(cell_x, cell_y).fov
       @block.call(cell_x, cell_y) if @block
 
       # If the cell blocks sight, skip it
