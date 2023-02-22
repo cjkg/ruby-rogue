@@ -2,6 +2,8 @@ include Curses
 
 module InitializeColors
   def initialize_colors
+
+    # TODO Have some logic that looks for what colors are available and then set accordingly
     init_pair(0, Curses::COLOR_BLACK, Curses::COLOR_BLACK)
     init_pair(1, Curses::COLOR_RED, Curses::COLOR_BLACK)
     init_pair(2, Curses::COLOR_GREEN, Curses::COLOR_BLACK)

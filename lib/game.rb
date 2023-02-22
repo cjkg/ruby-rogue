@@ -1,8 +1,9 @@
-require "./ui/curses_ui/curses_renderer"
-require "./ui/curses_ui/curses_input_handler"
-require "./entity/player"
-require "./map/game_map"
-require "./utils/initialize_colors"
+require_relative "ui/curses_ui/curses_renderer"
+require_relative "ui/curses_ui/curses_input_handler"
+require_relative "entity/player"
+require_relative "map/game_map"
+require_relative "utils/initialize_colors"
+require_relative "fov/shadow_cast"
 
 require "curses"
 
@@ -26,9 +27,12 @@ input = CursesInputHandler.new
 begin
   start_x = 10
   start_y = 10
-  player = Player.new(start_x, start_y, "@", 0, "Hero")
+  player = Player.new(start_x, start_y, "@", 0, "Hero", 10)
   entities = [player]
   map = GameMap.new(MAP_WIDTH, MAP_HEIGHT)
+  shadow = ShadowCast.new(map)
+  shadow.compute(player.x, player.y, 10)
+
   while true do
     action = input.handle_keys
 
@@ -36,9 +40,10 @@ begin
     quit = action["quit"]
 
     if move && player.can_move?(move["dx"], move["dy"])
-      renderer.clear_entities(entities)
-      renderer.render_map(map) # TODO: why is this not working? Then only render the tiles that changed
       player.move(move["dx"], move["dy"])
+      shadow.compute(player.x, player.y, player.fov)
+      renderer.clear_entities(entities)
+      renderer.render_map(map)
       renderer.render_entities(entities)
     elsif quit
       break

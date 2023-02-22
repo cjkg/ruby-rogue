@@ -1,4 +1,5 @@
 require_relative "floor"
+require_relative "wall"
 
 class GameMap
   def initialize(width, height)
@@ -6,7 +7,7 @@ class GameMap
     @height = height
     @tiles = Array.new(height) do
       Array.new(width) do
-        Floor.new
+        rand(0..100) < 1 ? Wall.new : Floor.new      
       end 
     end
   end
@@ -21,5 +22,9 @@ class GameMap
 
   def tiles
     @tiles
+  end
+
+  def get_tile(x, y)
+    @tiles[y][x]
   end
 end
