@@ -6,6 +6,8 @@ class Tile
     @explored = false
     @light = false
     @color = color
+    @fov = false
+    @dark_color = dark_color
   end
 
   def char
@@ -14,6 +16,14 @@ class Tile
 
   def color
     @color
+  end
+
+  def dark_color
+    @dark_color
+  end
+
+  def fov
+    @fov
   end
 
   def walkable?
@@ -32,6 +42,10 @@ class Tile
     @light
   end
 
+  def fov?
+    @fov
+  end
+
   def set_explored
     @explored = true
   end
@@ -42,5 +56,9 @@ class Tile
 
   def set_dark
     @light = false
+  end
+
+  def set_fov(fov)
+    @fov = fov
   end
 end

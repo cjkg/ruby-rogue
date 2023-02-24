@@ -1,14 +1,11 @@
-require_relative "../utils/map_utils"
-
-include MapUtils
-
 class Entity
-  def initialize x, y, char, color, name
+  def initialize(x, y, char, color, name, fov)
     @x = x
     @y = y
     @char = char
     @color = color
     @name = name
+    @fov = fov
   end
 
   def x
@@ -31,13 +28,26 @@ class Entity
     @name
   end
 
+  def fov
+    @fov
+  end
+
+  def set_fov(fov)
+    @fov = fov
+  end
+
+  def set_char(char)
+    @char = char
+  end
+
   def move dx, dy
     @x += dx
     @y += dy
   end
 
-  def can_move?(dx, dy)
-    in_bounds?(dx, dy)
+  def can_move?(dx, dy, map)
+    tile = map.get_tile(@x + dx, @y + dy)
+    !map.out_of_bounds?(@x + dx, @y + dy) && tile.walkable?
   end
 
   def set_color color

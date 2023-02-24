@@ -1,0 +1,88 @@
+require_relative "./quadrant"
+require_relative "./row"
+require_relative "../map/game_map"
+
+#Thanks to Albert Ford for his very helpful post/algorithm
+#https://www.albertford.com/shadowcasting/
+
+class ShadowCast
+  @@quadrants = 0..3
+
+  def initialize(map)
+    @map = map
+  end
+
+  def compute(x, y, radius)
+    reset_fov
+    return if @map.out_of_bounds?(x, y)
+    
+
+    @map.get_tile(x, y).set_fov(true)
+
+    @@quadrants.each do |quadrant|
+      quadrant = Quadrant.new(quadrant, x, y)
+      first_row = Row.new(1, -1, 1)
+      scan(first_row, quadrant, radius, x, y)
+    end
+  end
+
+  private
+
+  def reset_fov
+    @map.tiles.each do |row|
+      row.each do |tile|
+        tile.set_fov(false)
+      end
+    end
+  end
+
+  def scan(row, quadrant, radius, origin_x, origin_y)
+    prev_tile = nil
+    row.tiles.each do |row_tile|
+      map_tile_x, map_tile_y = quadrant.transform(row_tile[0], row_tile[1])
+      next unless within_radius?(map_tile_x, map_tile_y, origin_x, origin_y, radius)
+      break if @map.out_of_bounds?(map_tile_x, map_tile_y)
+      
+      map_tile = @map.get_tile(map_tile_x, map_tile_y)
+
+      if map_tile.blocks_sight? || is_symmetric(row, row_tile[0], row_tile[1])
+        map_tile.set_fov(true)
+        map_tile.set_explored
+      end
+  
+      row.set_start_slope(slope(row_tile[0], row_tile[1])) if prev_tile&.blocks_sight? && map_tile.walkable?
+      
+      if prev_tile&.walkable? && map_tile.blocks_sight?
+        next_row = row.next
+        next_row.set_end_slope(slope(row_tile[0], row_tile[1]))
+        scan(next_row, quadrant, radius, origin_x, origin_y)
+      end
+
+      prev_tile = map_tile
+    end
+
+
+    if prev_tile&.walkable?
+      scan(row.next, quadrant, radius, origin_x, origin_y)
+    end
+  end
+
+  def slope(tile_x, tile_y)
+    return Rational(2 * tile_y - 1, 2 * tile_x)
+  end
+
+  def is_symmetric(row, tile_x, tile_y)
+    row_depth = row.depth
+    col = tile_y
+    
+    col >= row_depth * row.start_slope && col <= row_depth * row.end_slope
+  end
+
+  def within_radius?(x, y, origin_x, origin_y, radius)
+    @map.distance(origin_x, origin_y, x, y) <= radius
+  end
+
+  def endarken(x, y)
+    @map.get_tile(x, y).set_fov(false)
+  end
+end

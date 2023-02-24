@@ -22,7 +22,7 @@ class CursesRenderer
   def render_map(map)
     map.tiles.each_with_index do |row, y|
       row.each_with_index do |tile, x|
-        render_map_tile(tile, x, y)
+        render_map_tile(tile, x, y) unless map.out_of_bounds?(x, y)
       end
     end
   end
@@ -30,10 +30,17 @@ class CursesRenderer
 private
 
   def render_map_tile(tile, x, y)
-    tile.color != 3 ? attrset(color_pair(tile.color)) : attrset(color_pair(tile.color) | A_BOLD) # TODO Fix this, dear god
-    setpos(y, x)
-    addch(tile.char)
-    attroff(color_pair(tile.color))
+    if tile.fov?
+      tile.color != 3 ? attrset(color_pair(tile.color)) : attrset(color_pair(tile.color) | A_BOLD) # TODO Fix this, dear god
+      setpos(y, x)
+      addch(tile.char)
+      attroff(color_pair(tile.color)) 
+    elsif tile.explored?
+      attrset(color_pair(tile.dark_color))
+      setpos(y, x)
+      addch(tile.char)
+      attroff(color_pair(tile.dark_color))
+    end
   end
 
   def render_entity(entity)
