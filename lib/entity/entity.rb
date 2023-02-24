@@ -46,8 +46,7 @@ class Entity
   end
 
   def can_move?(dx, dy, map)
-    tile = map.get_tile(@x + dx, @y + dy)
-    !map.out_of_bounds?(@x + dx, @y + dy) && tile.walkable?
+    !map.out_of_bounds?(@x + dx, @y + dy) && tile = map.get_tile(@x + dx, @y + dy).walkable?
   end
 
   def set_color color

@@ -2,8 +2,8 @@ require_relative "./quadrant"
 require_relative "./row"
 require_relative "../map/game_map"
 
-#Thanks to Albert Ford for his very helpful post/algorithm
-#https://www.albertford.com/shadowcasting/
+# Thanks to Albert Ford for his very helpful post/algorithm
+# https://www.albertford.com/shadowcasting/
 
 class ShadowCast
   @@quadrants = 0..3
@@ -40,11 +40,13 @@ class ShadowCast
     prev_tile = nil
     row.tiles.each do |row_tile|
       map_tile_x, map_tile_y = quadrant.transform(row_tile[0], row_tile[1])
-      next unless within_radius?(map_tile_x, map_tile_y, origin_x, origin_y, radius)
-      break if @map.out_of_bounds?(map_tile_x, map_tile_y)
-      
-      map_tile = @map.get_tile(map_tile_x, map_tile_y)
 
+      next unless within_radius?(map_tile_x, map_tile_y, origin_x, origin_y, radius)
+
+      next if @map.out_of_bounds?(map_tile_x, map_tile_y)
+
+      map_tile = @map.get_tile(map_tile_x, map_tile_y)
+      
       if map_tile.blocks_sight? || is_symmetric(row, row_tile[0], row_tile[1])
         map_tile.set_fov(true)
         map_tile.set_explored
@@ -79,10 +81,15 @@ class ShadowCast
   end
 
   def within_radius?(x, y, origin_x, origin_y, radius)
-    @map.distance(origin_x, origin_y, x, y) <= radius
-  end
-
-  def endarken(x, y)
-    @map.get_tile(x, y).set_fov(false)
+    @distance_cache ||= {}
+    key = [x, y, origin_x, origin_y]
+  
+    return @distance_cache[key] <= radius if @distance_cache.has_key?(key)
+    
+    distance = @map.distance(origin_x, origin_y, x, y)
+    
+    @distance_cache[key] = distance
+    
+    return distance <= radius
   end
 end
