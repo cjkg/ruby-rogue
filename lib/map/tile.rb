@@ -7,6 +7,7 @@ class Tile
     @light = false
     @color = color
     @fov = false
+    @dark_color = dark_color
   end
 
   def char
@@ -15,6 +16,10 @@ class Tile
 
   def color
     @color
+  end
+
+  def dark_color
+    @dark_color
   end
 
   def fov

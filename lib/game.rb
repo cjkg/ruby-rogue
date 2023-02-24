@@ -27,11 +27,10 @@ input = CursesInputHandler.new
 begin
   start_x = 10
   start_y = 10
-  player = Player.new(start_x, start_y, "@", 0, "Hero", 10)
+  player = Player.new(start_x, start_y, "@", 0, "Hero", 5)
   entities = [player]
   map = GameMap.new(MAP_WIDTH, MAP_HEIGHT)
   shadow = ShadowCast.new(map)
-  shadow.compute(player.x, player.y, 10)
 
   while true do
     action = input.handle_keys
@@ -39,7 +38,7 @@ begin
     move = action["move"]
     quit = action["quit"]
 
-    if move && player.can_move?(move["dx"], move["dy"])
+    if move && player.can_move?(move["dx"], move["dy"], map)
       player.move(move["dx"], move["dy"])
       shadow.compute(player.x, player.y, player.fov)
       renderer.clear_entities(entities)

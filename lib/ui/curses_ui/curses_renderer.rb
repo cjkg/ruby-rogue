@@ -22,7 +22,7 @@ class CursesRenderer
   def render_map(map)
     map.tiles.each_with_index do |row, y|
       row.each_with_index do |tile, x|
-        render_map_tile(tile, x, y) if x >= 0 && x < map.width && y >= 0 && y < map.height
+        render_map_tile(tile, x, y) unless map.out_of_bounds?(x, y)
       end
     end
   end
@@ -34,7 +34,12 @@ private
       tile.color != 3 ? attrset(color_pair(tile.color)) : attrset(color_pair(tile.color) | A_BOLD) # TODO Fix this, dear god
       setpos(y, x)
       addch(tile.char)
-      attroff(color_pair(tile.color))  
+      attroff(color_pair(tile.color)) 
+    elsif tile.explored?
+      attrset(color_pair(tile.dark_color))
+      setpos(y, x)
+      addch(tile.char)
+      attroff(color_pair(tile.dark_color))
     end
   end
 

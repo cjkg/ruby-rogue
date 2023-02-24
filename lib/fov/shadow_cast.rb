@@ -2,46 +2,68 @@ require_relative "./quadrant"
 require_relative "./row"
 require_relative "../map/game_map"
 
-# Class that computes the Field of View (FOV) of a given map from a given point
+#Thanks to Albert Ford for his very helpful post/algorithm
+#https://www.albertford.com/shadowcasting/
+
 class ShadowCast
-  # Constructor that sets up the map and block to be used in the computation
+  @@quadrants = 0..3
+
   def initialize(map)
     @map = map
   end
 
-  # Computes the FOV of the map from the given point
   def compute(x, y, radius)
-    return if x < 0 || y < 0 || x >= @map.width || y >= @map.height
+    reset_fov
+    return if @map.out_of_bounds?(x, y)
+    
 
-    # Set the starting point to be visible
     @map.get_tile(x, y).set_fov(true)
 
-    (0..3).each do |quadrant|
+    @@quadrants.each do |quadrant|
       quadrant = Quadrant.new(quadrant, x, y)
       first_row = Row.new(1, -1, 1)
-      scan(first_row, quadrant)
+      scan(first_row, quadrant, radius, x, y)
     end
   end
 
-  def scan(row, quadrant)
+  private
+
+  def reset_fov
+    @map.tiles.each do |row|
+      row.each do |tile|
+        tile.set_fov(false)
+      end
+    end
+  end
+
+  def scan(row, quadrant, radius, origin_x, origin_y)
     prev_tile = nil
     row.tiles.each do |row_tile|
       map_tile_x, map_tile_y = quadrant.transform(row_tile[0], row_tile[1])
-      map_tile = @map.get_tile(map_tile_x, map_tile_y)
-        
-      map_tile.set_fov(true) if map_tile.blocks_sight?
-  
-      row.start_slope = slope(row_tile[0], row_tile[1]) if prev_tile.blocks_sight? && map_tile.walkable?
+      next unless within_radius?(map_tile_x, map_tile_y, origin_x, origin_y, radius)
+      break if @map.out_of_bounds?(map_tile_x, map_tile_y)
       
-      if prev_tile.walkable? && map_tile.blocks_sight?
-        next_row = row.next
-        next_row.end_slope = slope(row_tile[0], row_tile[1])
-        scan(next_row, quadrant)
+      map_tile = @map.get_tile(map_tile_x, map_tile_y)
+
+      if map_tile.blocks_sight? || is_symmetric(row, row_tile[0], row_tile[1])
+        map_tile.set_fov(true)
+        map_tile.set_explored
       end
+  
+      row.set_start_slope(slope(row_tile[0], row_tile[1])) if prev_tile&.blocks_sight? && map_tile.walkable?
+      
+      if prev_tile&.walkable? && map_tile.blocks_sight?
+        next_row = row.next
+        next_row.set_end_slope(slope(row_tile[0], row_tile[1]))
+        scan(next_row, quadrant, radius, origin_x, origin_y)
+      end
+
+      prev_tile = map_tile
     end
 
-    if prev_tile.floor?
-      scan(row.next, quadrant)
+
+    if prev_tile&.walkable?
+      scan(row.next, quadrant, radius, origin_x, origin_y)
     end
   end
 
@@ -50,9 +72,17 @@ class ShadowCast
   end
 
   def is_symmetric(row, tile_x, tile_y)
-    row_depth = tile_x
+    row_depth = row.depth
     col = tile_y
     
     col >= row_depth * row.start_slope && col <= row_depth * row.end_slope
+  end
+
+  def within_radius?(x, y, origin_x, origin_y, radius)
+    @map.distance(origin_x, origin_y, x, y) <= radius
+  end
+
+  def endarken(x, y)
+    @map.get_tile(x, y).set_fov(false)
   end
 end

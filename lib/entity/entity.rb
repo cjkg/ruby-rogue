@@ -1,7 +1,3 @@
-require_relative "../utils/map_utils"
-
-include MapUtils
-
 class Entity
   def initialize(x, y, char, color, name, fov)
     @x = x
@@ -49,8 +45,9 @@ class Entity
     @y += dy
   end
 
-  def can_move?(dx, dy)
-    in_bounds?(dx, dy)
+  def can_move?(dx, dy, map)
+    tile = map.get_tile(@x + dx, @y + dy)
+    !map.out_of_bounds?(@x + dx, @y + dy) && tile.walkable?
   end
 
   def set_color color
