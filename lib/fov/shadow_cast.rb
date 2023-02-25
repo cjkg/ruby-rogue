@@ -15,7 +15,6 @@ class ShadowCast
   def compute(x, y, radius)
     reset_fov
     return if @map.out_of_bounds?(x, y)
-    
 
     @map.get_tile(x, y).set_fov(true)
 
@@ -38,6 +37,7 @@ class ShadowCast
 
   def scan(row, quadrant, radius, origin_x, origin_y)
     prev_tile = nil
+
     row.tiles.each do |row_tile|
       map_tile_x, map_tile_y = quadrant.transform(row_tile[0], row_tile[1])
 
@@ -46,15 +46,16 @@ class ShadowCast
       next if @map.out_of_bounds?(map_tile_x, map_tile_y)
 
       map_tile = @map.get_tile(map_tile_x, map_tile_y)
+      map_tile_blocks_sight = map_tile.blocks_sight?
       
-      if map_tile.blocks_sight? || is_symmetric(row, row_tile[0], row_tile[1])
+      if map_tile_blocks_sight || is_symmetric(row, row_tile[0], row_tile[1])
         map_tile.set_fov(true)
         map_tile.set_explored
       end
   
       row.set_start_slope(slope(row_tile[0], row_tile[1])) if prev_tile&.blocks_sight? && map_tile.walkable?
       
-      if prev_tile&.walkable? && map_tile.blocks_sight?
+      if prev_tile&.walkable? && map_tile_blocks_sight
         next_row = row.next
         next_row.set_end_slope(slope(row_tile[0], row_tile[1]))
         scan(next_row, quadrant, radius, origin_x, origin_y)
@@ -70,7 +71,17 @@ class ShadowCast
   end
 
   def slope(tile_x, tile_y)
-    return Rational(2 * tile_y - 1, 2 * tile_x)
+    @slope_cache ||= {}
+
+    key = [tile_x, tile_y]
+
+    if @slope_cache.has_key?(key)
+      return @slope_cache[key]
+    else
+      slope = Rational(2 * tile_y - 1, 2 * tile_x)
+      @slope_cache[key] = slope
+      return slope
+    end
   end
 
   def is_symmetric(row, tile_x, tile_y)

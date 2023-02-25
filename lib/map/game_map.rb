@@ -10,7 +10,6 @@ class GameMap
         rand(0..100) < 10 ? Wall.new : Floor.new      
       end 
     end
-    @visible_tiles = []
   end
 
   def width
