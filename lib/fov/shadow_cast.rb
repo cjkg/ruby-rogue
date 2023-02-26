@@ -65,7 +65,6 @@ class ShadowCast
       prev_tile = map_tile
     end
 
-
     if prev_tile&.walkable?
       scan(row.next, quadrant, radius, origin_x, origin_y)
     end

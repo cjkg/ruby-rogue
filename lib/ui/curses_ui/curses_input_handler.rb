@@ -4,7 +4,7 @@ class CursesInputHandler
 
   def handle_keys
     ch = Curses.getch
-    output = case ch
+    output = case ch.downcase  
     when "w", "k"
       {"move" => {"dx" => 0, "dy" => -1}}
     when "s", "j"

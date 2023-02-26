@@ -4,10 +4,10 @@ require "matrix"
 
 class GameMap
   attr_accessor :width, :height, :tiles, :grid
-  def initialize(width, height)
+  def initialize(width, height, floor)
     @width = width
     @height = height
-
+    @floor = floor
     #TODO make this a 1D array?
     @tiles = Array.new(height) do
       Array.new(width) do
@@ -18,11 +18,14 @@ class GameMap
   end
 
   def get_tile(x, y)
+    # Grab the tile at the given coordinates.
     @tiles[y][x]
   end
 
   def explored?(x, y)
+    # Check if the tile at the given coordinates has been explored.
     @explored ||= {}
+    # Memoize the result.
     @explored[[x, y]] ||= get_tile(x, y).explored?
   end
 
@@ -34,22 +37,11 @@ class GameMap
   
   def distance(x1, y1, x2, y2)
     # Calculate the euclidean distance between two points.
-    # TODO: Memoize?
     Math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
   end
 
   def dijkstra_map(start_x, start_y)
     # Initialize the distances array with all distances set to infinity.
-    """
-    TODO: Memoization here? Memory too much for limited payoff, esp with destructible tiles?
-    @distances_cache ||= {}
-
-    if @distances_cache.key?([[start_x, start_y], @tiles])
-      @distances = @distances_cache[[start_x, start_y], @tiles]
-      return @distances
-    end
-    """
-
     @distances = Array.new(@width * @height, Float::INFINITY)
 
     # Set the distance of the starting cell to 0.
@@ -86,8 +78,6 @@ class GameMap
       end
     end
 
-    # TODO: memoization @distances_cache[[start_x, start_y], @tiles] = @distances
-
     @distances
   end
 
@@ -112,10 +102,12 @@ class GameMap
   end
 
   def dijkstra_index(x, y)
+    # Get the index of a cell in the distances array.
     y * @width + x
   end
   
   def dijkstra_coordinates(i)
+    # Get the coordinates of a cell in the distances array.
     [i % @width, i / @width]
   end  
 end

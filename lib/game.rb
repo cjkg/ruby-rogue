@@ -29,7 +29,8 @@ begin
   start_y = 10
   player = Player.new(start_x, start_y, "@", 0, "Hero", 5)
   entities = [player]
-  map = GameMap.new(MAP_WIDTH, MAP_HEIGHT)
+  FLOOR = 1
+  map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, FLOOR)
   shadow = ShadowCast.new(map)
 
   while true do
