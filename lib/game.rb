@@ -41,6 +41,7 @@ begin
     if move && player.can_move?(move["dx"], move["dy"], map)
       player.move(move["dx"], move["dy"])
       shadow.compute(player.x, player.y, player.fov)
+      map.dijkstra_map(player.x, player.y)
       renderer.clear_entities(entities)
       renderer.render_map(map)
       renderer.render_entities(entities)

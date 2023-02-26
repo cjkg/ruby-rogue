@@ -13,10 +13,11 @@ class ShadowCast
   end
 
   def compute(x, y, radius)
+    #TODO use a bitmask on this
     reset_fov
     return if @map.out_of_bounds?(x, y)
 
-    @map.get_tile(x, y).set_fov(true)
+    @map.get_tile(x, y).fov = true
 
     @@quadrants.each do |quadrant|
       quadrant = Quadrant.new(quadrant, x, y)
@@ -30,7 +31,7 @@ class ShadowCast
   def reset_fov
     @map.tiles.each do |row|
       row.each do |tile|
-        tile.set_fov(false)
+        tile.fov = false
       end
     end
   end
@@ -49,15 +50,15 @@ class ShadowCast
       map_tile_blocks_sight = map_tile.blocks_sight?
       
       if map_tile_blocks_sight || is_symmetric(row, row_tile[0], row_tile[1])
-        map_tile.set_fov(true)
-        map_tile.set_explored
+        map_tile.fov = true
+        map_tile.explored = true
       end
   
-      row.set_start_slope(slope(row_tile[0], row_tile[1])) if prev_tile&.blocks_sight? && map_tile.walkable?
+      row.start_slope = slope(row_tile[0], row_tile[1]) if prev_tile&.blocks_sight? && map_tile.walkable?
       
       if prev_tile&.walkable? && map_tile_blocks_sight
         next_row = row.next
-        next_row.set_end_slope(slope(row_tile[0], row_tile[1]))
+        next_row.end_slope = slope(row_tile[0], row_tile[1])
         scan(next_row, quadrant, radius, origin_x, origin_y)
       end
 

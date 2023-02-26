@@ -22,7 +22,8 @@ class CursesRenderer
   def render_map(map)
     map.tiles.each_with_index do |row, y|
       row.each_with_index do |tile, x|
-        render_map_tile(tile, x, y) unless map.out_of_bounds?(x, y)
+        next if map.out_of_bounds?(x, y) || !map.explored?(x, y)
+        render_map_tile(tile, x, y)
       end
     end
   end
@@ -35,7 +36,7 @@ private
       setpos(y, x)
       addch(tile.char)
       attroff(color_pair(tile.color)) 
-    elsif tile.explored?
+    else #explored but not in fov
       attrset(color_pair(tile.dark_color))
       setpos(y, x)
       addch(tile.char)
