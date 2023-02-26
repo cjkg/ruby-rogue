@@ -15,6 +15,6 @@ class Entity
   end
 
   def can_move?(dx, dy, map)
-    !map.out_of_bounds?(@x + dx, @y + dy) && tile = map.get_tile(@x + dx, @y + dy).walkable?
+    !map.out_of_bounds?(@x + dx, @y + dy) && map.get_tile(@x + dx, @y + dy).walkable?
   end
 end
