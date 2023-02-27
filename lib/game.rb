@@ -12,14 +12,13 @@ include InitializeColors
 
 MAP_WIDTH = 80
 MAP_HEIGHT = 24
-
+FLOOR = 1
 init_screen
 start_color
-# use_default_colors
 
 curs_set(0)
 noecho
-initialize_colors # TODO: Why is this not working?
+initialize_colors
  
 renderer = CursesRenderer.new
 input = CursesInputHandler.new
@@ -29,12 +28,11 @@ begin
   start_y = 10
   player = Player.new(start_x, start_y, "@", 0, "Hero", 5)
   entities = [player]
-  FLOOR = 1
-  map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, FLOOR)
+  map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, 1)
   shadow = ShadowCast.new(map)
 
   while true do
-    action = input.handle_keys
+    action = input.handle_keys # TODO : This should be rethought
 
     move = action["move"]
     quit = action["quit"]

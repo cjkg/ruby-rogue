@@ -4,16 +4,16 @@ class CursesInputHandler
 
   def handle_keys
     ch = Curses.getch
-    output = case ch.downcase  
-    when "w", "k"
+    output = case ch
+    when "w", "W", "k", "K"
       {"move" => {"dx" => 0, "dy" => -1}}
-    when "s", "j"
+    when "s", "S", "j", "J"
       {"move" => {"dx" => 0, "dy" => 1}}
-    when "a", "h"
+    when "a", "A", "h", "H"
       {"move" => {"dx" => -1, "dy" => 0}}
-    when "d", "l" 
+    when "d", "D" "l", "L" 
       {"move" => {"dx" => 1, "dy" => 0}}
-    when "q"
+    when "q", "Q"
       {"quit" => true}
     else
       {}

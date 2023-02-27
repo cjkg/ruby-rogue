@@ -6,6 +6,7 @@ require_relative "../map/game_map"
 # https://www.albertford.com/shadowcasting/
 
 class ShadowCast
+  # TODO : Move this into GameMap
   @@quadrants = 0..3
 
   def initialize(map)
@@ -13,11 +14,11 @@ class ShadowCast
   end
 
   def compute(x, y, radius)
-    #TODO use a bitmask on this
-    reset_fov
+    @map.reset_fov
     return if @map.out_of_bounds?(x, y)
 
-    @map.get_tile(x, y).fov = true
+    @map.set_fov_tile(x, y)
+    @map.set_explored_tile(x, y)
 
     @@quadrants.each do |quadrant|
       quadrant = Quadrant.new(quadrant, x, y)
@@ -27,14 +28,6 @@ class ShadowCast
   end
 
   private
-
-  def reset_fov
-    @map.tiles.each do |row|
-      row.each do |tile|
-        tile.fov = false
-      end
-    end
-  end
 
   def scan(row, quadrant, radius, origin_x, origin_y)
     prev_tile = nil
@@ -48,10 +41,10 @@ class ShadowCast
 
       map_tile = @map.get_tile(map_tile_x, map_tile_y)
       map_tile_blocks_sight = map_tile.blocks_sight?
-      
+
       if map_tile_blocks_sight || is_symmetric(row, row_tile[0], row_tile[1])
-        map_tile.fov = true
-        map_tile.explored = true
+        @map.set_fov_tile(map_tile_x, map_tile_y)
+        @map.set_explored_tile(map_tile_x, map_tile_y)
       end
   
       row.start_slope = slope(row_tile[0], row_tile[1]) if prev_tile&.blocks_sight? && map_tile.walkable?

@@ -8,25 +8,25 @@ class GameMap
     @width = width
     @height = height
     @floor = floor
-    #TODO make this a 1D array?
-    @tiles = Array.new(height) do
-      Array.new(width) do
-        rand(0..100) < 10 ? Wall.new : Floor.new      
-      end 
+    @tiles = Array.new(@height * @width) do
+      rand(0..100) < 10 ? Wall.new : Floor.new
     end
     @grid = build_floor_grid
   end
 
   def get_tile(x, y)
     # Grab the tile at the given coordinates.
-    @tiles[y][x]
+    @tiles[index(x, y)]
   end
 
   def explored?(x, y)
     # Check if the tile at the given coordinates has been explored.
-    @explored ||= {}
-    # Memoize the result.
-    @explored[[x, y]] ||= get_tile(x, y).explored?
+    @explored&.has_key?([x, y])
+  end
+
+  def fov?(x, y)
+    # Check if the tile at the given coordinates is in the player's field of view.
+    @fov&.has_key?([x, y])
   end
 
   def out_of_bounds?(x, y)
@@ -41,11 +41,14 @@ class GameMap
   end
 
   def dijkstra_map(start_x, start_y)
+    # TODO: figure out a way to remake the floor grid when a wall gets destroyed
+    #build_floor_grid
+
     # Initialize the distances array with all distances set to infinity.
     @distances = Array.new(@width * @height, Float::INFINITY)
 
     # Set the distance of the starting cell to 0.
-    @distances[dijkstra_index(start_x, start_y)] = 0
+    @distances[index(start_x, start_y)] = 0
   
     # Create a priority queue to store the nodes to explore, ordered by distance.
     # TODO: Use a binary heap instead of an array. Or a real priority queue, no real gems available.
@@ -65,7 +68,7 @@ class GameMap
           !@grid[neighbor_x, neighbor_y]
   
         # Get the index of the neighbor in the distances array.
-        neighbor_index = dijkstra_index(neighbor_x, neighbor_y)
+        neighbor_index = index(neighbor_x, neighbor_y)
         
         # Calculate the distance to the neighbor through the current node.
         neighbor_dist = node_dist + 1
@@ -81,33 +84,37 @@ class GameMap
     @distances
   end
 
+  def reset_fov
+    # Reset the field of view.
+    @fov = {}
+  end
+
+  def set_fov_tile(x, y)
+    # Set a tile as visible in the field of view.
+    @fov ||= {}
+    @fov[[x, y]] = true
+  end
+
+  def set_explored_tile(x, y)
+    # Set a tile as explored.
+    @explored ||= {}
+    @explored[[x, y,]] = true
+  end
+
+  def coordinates(i)
+    # Get the coordinates of a cell in a 1D map array.
+    [i % @width, i / @width]
+  end  
+
   private
   
   def build_floor_grid
     # Create a grid of booleans representing the walkable tiles. Used by dijkstra map.
-
-    # Initialize the grid with all cells set to walkable.
-    @grid = Array.new(@height) do
-      Array.new(@width, true)
-    end
-
-    # Set the value of each walkable tile to true.
-    @tiles.each_with_index do |row, y|
-      row.each_with_index do |tile, x|
-        @grid[x, y] = false unless tile.walkable?
-      end
-    end
-
-    @grid
+    @grid = @tiles.map { |tile| tile.walkable? }
   end
 
-  def dijkstra_index(x, y)
-    # Get the index of a cell in the distances array.
+  def index(x, y)
+    # Get the index of a cell in the a 1D map array.
     y * @width + x
-  end
-  
-  def dijkstra_coordinates(i)
-    # Get the coordinates of a cell in the distances array.
-    [i % @width, i / @width]
   end  
 end

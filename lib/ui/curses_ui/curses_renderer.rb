@@ -20,18 +20,17 @@ class CursesRenderer
   end
 
   def render_map(map)
-    map.tiles.each_with_index do |row, y|
-      row.each_with_index do |tile, x|
-        next if map.out_of_bounds?(x, y) || !map.explored?(x, y)
-        render_map_tile(tile, x, y)
-      end
+    map.tiles.each_with_index do |tile, i|
+      x, y = map.coordinates(i)
+      next if map.out_of_bounds?(x, y) || !map.explored?(x, y)
+      render_map_tile(map, x, y)
     end
   end
 
 private
-
-  def render_map_tile(tile, x, y)
-    if tile.fov?
+  def render_map_tile(map, x, y)
+    tile = map.get_tile(x, y)
+    if map.fov?(x, y)
       tile.color != 3 ? attrset(color_pair(tile.color)) : attrset(color_pair(tile.color) | A_BOLD) # TODO Fix this, dear god
       setpos(y, x)
       addch(tile.char)
