@@ -10,8 +10,10 @@ require "curses"
 include Curses
 include InitializeColors
 
+#TODO : This should be in a config file
 MAP_WIDTH = 80
 MAP_HEIGHT = 24
+MAP_DEBUG = true # TODO : flip this
 FLOOR = 1
 init_screen
 start_color
@@ -30,8 +32,8 @@ begin
   entities = [player]
   map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, 1)
   shadow = ShadowCast.new(map)
-
   while true do
+    renderer.render_map(map) if MAP_DEBUG
     action = input.handle_keys # TODO : This should be rethought
 
     move = action["move"]

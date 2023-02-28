@@ -1,6 +1,6 @@
 require_relative "floor"
 require_relative "wall"
-require "matrix"
+require_relative "rectangular_room"
 
 class GameMap
   attr_accessor :width, :height, :tiles, :grid
@@ -8,11 +8,19 @@ class GameMap
     @width = width
     @height = height
     @floor = floor
-    @tiles = Array.new(@height * @width) do
-      rand(0..100) < 10 ? Wall.new : Floor.new
-    end
-    @grid = build_floor_grid
+    make_map
+    build_floor_grid
   end
+
+  # Map generation
+
+  def make_map
+    # Create an array of tiles and fill it with floor tiles.
+    @tiles = Array.new(@width * @height) { Wall.new }    
+    
+  end
+
+  # Helper methods
 
   def get_tile(x, y)
     # Grab the tile at the given coordinates.
@@ -98,7 +106,7 @@ class GameMap
   def set_explored_tile(x, y)
     # Set a tile as explored.
     @explored ||= {}
-    @explored[[x, y,]] = true
+    @explored[[x, y]] = true
   end
 
   def coordinates(i)
