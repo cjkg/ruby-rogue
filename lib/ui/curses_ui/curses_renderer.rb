@@ -32,12 +32,12 @@ private
     tile = map.get_tile(x, y)
 
 
-    if MAP_DEBUG
+    if MAP_DEBUG #debug mode - show all tiles
       tile.color != 3 ? attrset(color_pair(tile.color)) : attrset(color_pair(tile.color) | A_BOLD) # TODO Fix this, dear god
       setpos(y, x)
       addch(tile.char)
       attroff(color_pair(tile.color)) 
-    elsif map.fov?(x, y)
+    elsif map.fov?(x, y) #in field of vision
       tile.color != 3 ? attrset(color_pair(tile.color)) : attrset(color_pair(tile.color) | A_BOLD) # TODO Fix this, dear god
       setpos(y, x)
       addch(tile.char)

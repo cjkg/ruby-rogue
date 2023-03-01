@@ -2,13 +2,14 @@ require_relative "ui/curses_ui/curses_renderer"
 require_relative "ui/curses_ui/curses_input_handler"
 require_relative "entity/player"
 require_relative "map/game_map"
+require_relative "proc_gen/proc_gen"
 require_relative "utils/initialize_colors"
 require_relative "fov/shadow_cast"
-
 require "curses"
 
 include Curses
 include InitializeColors
+include ProcGen
 
 #TODO : This should be in a config file
 MAP_WIDTH = 80
@@ -31,6 +32,7 @@ begin
   player = Player.new(start_x, start_y, "@", 0, "Hero", 5)
   entities = [player]
   map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, 1)
+  make_dungeon_floor(map, 100, 5, 10)
   shadow = ShadowCast.new(map)
   while true do
     renderer.render_map(map) if MAP_DEBUG

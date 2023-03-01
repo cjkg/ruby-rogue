@@ -16,8 +16,26 @@ class GameMap
 
   def make_map
     # Create an array of tiles and fill it with floor tiles.
-    @tiles = Array.new(@width * @height) { Wall.new }    
-    
+    @tiles = Array.new(@width * @height) { Wall.new }
+  end
+
+  def carve_tile(x, y)
+    # Set the tile at the given coordinates to a floor tile.
+    @tiles[index(x, y)] = Floor.new
+  end
+
+  def carve_rooms(room_arr)
+    room_arr.each do |room|
+      room.inner.each do |x, y|
+        carve_tile(x, y)
+      end
+    end
+  end
+
+  def carve_maze(maze)
+    maze.each do |tile|
+      carve_tile(tile[0], tile[1])
+    end
   end
 
   # Helper methods
@@ -50,7 +68,7 @@ class GameMap
 
   def dijkstra_map(start_x, start_y)
     # TODO: figure out a way to remake the floor grid when a wall gets destroyed
-    #build_floor_grid
+    # build_floor_grid
 
     # Initialize the distances array with all distances set to infinity.
     @distances = Array.new(@width * @height, Float::INFINITY)
@@ -109,6 +127,11 @@ class GameMap
     @explored[[x, y]] = true
   end
 
+  def index(x, y)
+    # Get the index of a cell in the a 1D map array.
+    y * @width + x
+  end  
+
   def coordinates(i)
     # Get the coordinates of a cell in a 1D map array.
     [i % @width, i / @width]
@@ -121,8 +144,4 @@ class GameMap
     @grid = @tiles.map { |tile| tile.walkable? }
   end
 
-  def index(x, y)
-    # Get the index of a cell in the a 1D map array.
-    y * @width + x
-  end  
 end
