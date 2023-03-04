@@ -9,7 +9,6 @@ require "curses"
 
 include Curses
 include InitializeColors
-include ProcGen
 
 #TODO : This should be in a config file
 MAP_WIDTH = 80
@@ -32,7 +31,8 @@ begin
   player = Player.new(start_x, start_y, "@", 0, "Hero", 5)
   entities = [player]
   map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, 1)
-  make_dungeon_floor(map, 100, 5, 10)
+  proc_gen = ProcGen.new(map)
+  proc_gen.make_dungeon_floor(100, 5, 10)
   shadow = ShadowCast.new(map)
   while true do
     renderer.render_map(map) if MAP_DEBUG

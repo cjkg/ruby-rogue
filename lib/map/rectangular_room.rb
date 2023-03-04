@@ -13,8 +13,8 @@ class RectangularRoom < Room
 
   def inner
     # Get the inner coordinates of the room.
-    xs = ((@x1 + 1)..(@x2)).to_a
-    ys = ((@y1 + 1)..(@y2)).to_a
+    xs = ((@x1 + 1)..@x2).to_a
+    ys = ((@y1 + 1)..@y2).to_a
 
     # Get the Cartesian product of the two arrays
     xs.product(ys)
