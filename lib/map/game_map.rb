@@ -24,6 +24,11 @@ class GameMap
     @tiles[index(x, y)] = Floor.new
   end
 
+  def uncarve_tile(x, y)
+    # Set the tile at the given coordinates to a wall tile.
+    @tiles[index(x, y)] = Wall.new
+  end
+
   def carve_rooms(room_arr)
     room_arr.each do |room|
       room.inner.each do |x, y|
@@ -38,11 +43,34 @@ class GameMap
     end
   end
 
+  def get_regions
+    regions = []
+    @tiles.each_with_index do |tile, index|
+      coords = coordinates(index)
+      next if tile.is_a?(Wall)
+      next if regions.any? { |region| region.include?(coords) }
+
+      regions << get_region(coords[0], coords[1])
+    end
+    regions
+  end
+
+
   # Helper methods
 
   def get_tile(x, y)
     # Grab the tile at the given coordinates.
     @tiles[index(x, y)]
+  end
+
+  def floor?(x, y)
+    # Check if the tile at the given coordinates is a floor tile.
+    get_tile(x, y).is_a?(Floor)
+  end
+
+  def wall?(x, y)
+    # Check if the tile at the given coordinates is a wall tile.
+    get_tile(x, y).is_a?(Wall)
   end
 
   def explored?(x, y)

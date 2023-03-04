@@ -3,13 +3,16 @@ class ProcGen
     @map = map
     @visited = {}
     @maze = []
+    @regions = []
   end
 
   def make_dungeon_floor(max_rooms, room_min_size, room_max_size)
-    #rooms = make_dungeon_rooms(max_rooms, room_min_size, room_max_size)
-    #@map.carve_rooms(rooms)
-    @maze = make_maze([])
+    rooms = make_dungeon_rooms(max_rooms, room_min_size, room_max_size)
+    @map.carve_rooms(rooms)
+    @maze = make_maze(rooms)
     @map.carve_maze(@maze)
+    connect_regions
+    remove_dead_ends
   end
 
   private
@@ -29,6 +32,7 @@ class ProcGen
       next if room_arr.any? { |n| n.intersects?(new_room) }
 
       room_arr << new_room
+      @regions << new_room.inner
     end
     room_arr
   end
@@ -52,7 +56,6 @@ class ProcGen
 
       get_next_cell(x, y, x2, y2)
     end
-
     @maze
   end
 
@@ -67,15 +70,7 @@ class ProcGen
     when [-1, 0]
       "West"
     when [1, 0]
-      "East"
-    when [-1, -1]
-      "Northwest"
-    when [1, -1]
-      "Northeast"
-    when [-1, 1]
-      "Southwest"
-    when [1, 1]
-      "Southeast"
+      "East"  
     end
   end
 
@@ -92,45 +87,64 @@ class ProcGen
   end 
 
   def get_next_cell(x, y, x2, y2)
+    region = []
     loop do
       @maze << [x, y]
+      region << [x, y]
       @visited[[x, y]] = true
 
       dir = get_direction(x, y, x2, y2) # get direction to next cell
 
       case dir
-      when "North"
+      when "North", "South"
         @visited[[x - 1, y]] = true
         @visited[[x + 1, y]] = true
-        #@visited[[x, y - 1]] = true
-        #@visited[[x - 1, y - 1]] = true
-        #@visited[[x + 1, y - 1]] = true
-      when "South"
-        @visited[[x - 1, y]] = true
-        @visited[[x + 1, y]] = true
-        #@visited[[x, y + 1]] = true
-        #@visited[[x - 1, y + 1]] = true
-        #@visited[[x + 1, y + 1]] = true
-      when "West"
+      when "West", "East"
         @visited[[x, y - 1]] = true
         @visited[[x, y + 1]] = true
-        #@visited[[x - 1, y]] = true
-        #@visited[[x - 1, y - 1]] = true
-        #@visited[[x - 1, y + 1]] = true
-      when "East"
-        @visited[[x, y - 1]] = true
-        @visited[[x, y + 1]] = true
-        #@visited[[x + 1, y]] = true
-        #@visited[[x + 1, y - 1]] = true
-        #@visited[[x + 1, y + 1]] = true
       end
     
       candidates = get_cardinal_cell_available_neighbors(x2, y2)
     
       break if candidates.empty?
-      
+
       x, y = x2, y2
       x2, y2 = candidates.sample
     end
+    @regions << region
   end
-end 
+
+  def remove_dead_ends
+    done = false
+
+    until done
+
+      done = true
+      @map.tiles.each_with_index do |tile, index|
+        x, y = @map.coordinates(index)
+        next if @map.wall?(x, y)
+
+        exits = 0
+
+        get_cardinal_cell_neighbors(x, y).each do |neighbor|
+          nx, ny = neighbor
+          exits += 1 if @map.floor?(nx, ny)
+        end
+
+        next if exits > 1
+
+        done = false
+        @map.uncarve_tile(x, y)  # change to maze
+      end
+    end
+  end
+
+  def connect_regions
+    @map.tiles.each_with_index do |tile, index|
+      x, y = @map.coordinates(index)
+      next if @map.floor?(x, y)
+      
+      regions = []
+    end
+  end
+end
