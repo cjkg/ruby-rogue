@@ -32,7 +32,7 @@ begin
   entities = [player]
   map = GameMap.new(MAP_WIDTH, MAP_HEIGHT, 1)
   proc_gen = ProcGen.new(map)
-  proc_gen.make_dungeon_floor(100, 5, 10)
+  proc_gen.make_dungeon_floor(100, 4, 8)
   shadow = ShadowCast.new(map)
   while true do
     renderer.render_map(map) if MAP_DEBUG

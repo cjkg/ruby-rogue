@@ -1,15 +1,18 @@
+require 'set'
+
 class ProcGen
   def initialize(map)
     @map = map
     @visited = {}
     @maze = []
     @regions = []
+    build_neighbor_map
   end
 
   def make_dungeon_floor(max_rooms, room_min_size, room_max_size)
-    rooms = make_dungeon_rooms(max_rooms, room_min_size, room_max_size)
-    @map.carve_rooms(rooms)
-    @maze = make_maze(rooms)
+    @rooms = make_dungeon_rooms(max_rooms, room_min_size, room_max_size)
+    @map.carve_rooms(@rooms)
+    @maze = make_maze
     @map.carve_maze(@maze)
     connect_regions
     remove_dead_ends
@@ -32,15 +35,15 @@ class ProcGen
       next if room_arr.any? { |n| n.intersects?(new_room) }
 
       room_arr << new_room
-      @regions << new_room.inner
+      @regions << new_room.full
     end
     room_arr
   end
 
-  def make_maze(rooms)
+  def make_maze
     @map.tiles.each_with_index do |tile, index|
       coords = @map.coordinates(index)
-      @visited[coords] = rooms.any? { |room| room.point_intersects?(coords[0], coords[1]) }
+      @visited[coords] = @rooms.any? { |room| room.point_intersects?(coords[0], coords[1]) }
     end
 
     @map.tiles.each_with_index do |tile, index|
@@ -74,8 +77,39 @@ class ProcGen
     end
   end
 
-  def get_cardinal_cell_neighbors(x, y)
+  def build_neighbor_map
+    @neighbor_map = {}
+    @map.tiles.each_with_index do |tile, index|
+      coords = @map.coordinates(index)
+      @neighbor_map[coords] = cardinal_neighbors_for_map(coords[0], coords[1])
+    end
+  end
+
+  def build_region_hash
+    @region_hash = {}
+    @map.tiles.each_with_index do |tile, index|
+      coords = @map.coordinates(index)
+      x, y = coords
+      next if @map.floor?(x, y)
+      @region_hash[coords] = get_region(x, y)
+    end
+    @region_hash
+  end
+
+  def get_region(x, y)
+    tmp_regions = []
+    @regions.each do |region|
+      tmp_regions << region if region.include?([x, y])
+    end
+    tmp_regions
+  end
+
+  def cardinal_neighbors_for_map(x, y)
     [[x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y]] # N, S, W, E
+  end
+
+  def get_cardinal_cell_neighbors(x, y)
+    @neighbor_map[[x, y]]
   end
 
   def get_cardinal_cell_available_neighbors(x, y)
@@ -98,10 +132,16 @@ class ProcGen
       case dir
       when "North", "South"
         @visited[[x - 1, y]] = true
+        region << [x - 1, y]
+
         @visited[[x + 1, y]] = true
+        region << [x + 1, y]
       when "West", "East"
         @visited[[x, y - 1]] = true
+        region << [x, y - 1]
+
         @visited[[x, y + 1]] = true
+        region << [x, y + 1]
       end
     
       candidates = get_cardinal_cell_available_neighbors(x2, y2)
@@ -140,11 +180,15 @@ class ProcGen
   end
 
   def connect_regions
+    region_hash = build_region_hash 
+
     @map.tiles.each_with_index do |tile, index|
       x, y = @map.coordinates(index)
       next if @map.floor?(x, y)
-      
-      regions = []
+      region_hash.delete([x, y]) if region_hash[[x, y]].length < 2
     end
+
+    connectors = region_hash.keys
+    
   end
 end
