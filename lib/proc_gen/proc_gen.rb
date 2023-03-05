@@ -4,8 +4,8 @@ class ProcGen
   def initialize(map)
     @map = map
     @visited = {}
-    @maze = []
-    @regions = []
+    @maze = Set[]
+    @regions = Set[]
     build_neighbor_map
   end
 
@@ -21,12 +21,12 @@ class ProcGen
   private
 
   def make_dungeon_rooms(max_rooms, room_min_size, room_max_size)
-    room_arr = []
+    room_arr = Set[]
 
     max_rooms.times do
       room_width = rand(room_min_size..room_max_size)
       room_height = rand(room_min_size..room_max_size)
-      
+
       x = rand(0..@map.width - room_width - 1)
       y = rand(0..@map.height - room_height - 1)
 
@@ -97,7 +97,7 @@ class ProcGen
   end
 
   def get_region(x, y)
-    tmp_regions = []
+    tmp_regions = Set[]
     @regions.each do |region|
       tmp_regions << region if region.include?([x, y])
     end
@@ -121,7 +121,7 @@ class ProcGen
   end 
 
   def get_next_cell(x, y, x2, y2)
-    region = []
+    region = Set[]
     loop do
       @maze << [x, y]
       region << [x, y]
@@ -180,7 +180,7 @@ class ProcGen
   end
 
   def connect_regions
-    region_hash = build_region_hash 
+    region_hash = build_region_hash # TODO Optimize this
 
     @map.tiles.each_with_index do |tile, index|
       x, y = @map.coordinates(index)
@@ -189,6 +189,5 @@ class ProcGen
     end
 
     connectors = region_hash.keys
-    
   end
 end

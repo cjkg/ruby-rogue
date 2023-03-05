@@ -17,21 +17,21 @@ class RectangularRoom < Room
     ys = (@y1 + 1..@y2 - 1).to_a
 
     # Get the Cartesian product of the two arrays
-    xs.product(ys)
+    Set.new(xs.product(ys))
   end
 
   def outer
     # Get the outer coordinates of the room.
     xs = [@x1, @x2].product((@y1..@y2).to_a)
     ys = (@x1 + 1..@x2 - 1).to_a.product([@y1, @y2])
-    xs + ys
+    Set.new(xs + ys)
   end
 
   def full
     # Get the full coordinates of the room.
     xs = (@x1..@x2).to_a
     ys = (@y1..@y2).to_a
-    xs.product(ys)
+    Set.new(xs.product(ys))
   end
 
   def intersects?(other)
