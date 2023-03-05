@@ -43,19 +43,6 @@ class GameMap
     end
   end
 
-  def get_regions
-    regions = []
-    @tiles.each_with_index do |tile, index|
-      coords = coordinates(index)
-      next if tile.is_a?(Wall)
-      next if regions.any? { |region| region.include?(coords) }
-
-      regions << get_region(coords[0], coords[1])
-    end
-    regions
-  end
-
-
   # Helper methods
 
   def get_tile(x, y)

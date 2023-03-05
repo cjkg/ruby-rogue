@@ -20,6 +20,13 @@ class RectangularRoom < Room
     xs.product(ys)
   end
 
+  def outer(x, y, x2, y2)
+    # Get the outer coordinates of the room.
+    xs = [x, x2].product((y..y2).to_a)
+    ys = (x + 1..x2 - 1).to_a.product([y, y2])
+    xs + ys
+  end
+
   def intersects?(other)
     # Return true if this room intersects with another one.
     (@x1 <= other.x2) && (@x2 >= other.x1) && (@y1 <= other.y2) && (@y2 >= other.y1)
