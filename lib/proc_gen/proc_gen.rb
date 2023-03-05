@@ -6,7 +6,7 @@ class ProcGen
     @visited = {}
     @maze = Set[]
     @regions = Set[]
-    build_neighbor_map
+    build_neighbor_hash
   end
 
   def make_dungeon_floor(max_rooms, room_min_size, room_max_size)
@@ -77,48 +77,63 @@ class ProcGen
     end
   end
 
-  def build_neighbor_map
-    @neighbor_map = {}
+  def build_neighbor_hash
+    @neighbor_hash = {}
     @map.tiles.each_with_index do |tile, index|
       coords = @map.coordinates(index)
-      @neighbor_map[coords] = cardinal_neighbors_for_map(coords[0], coords[1])
+      @neighbor_hash[coords] = cardinal_neighbors_for_map(coords[0], coords[1])
     end
   end
 
-  def build_region_hash
+  def build_region_hash #TODO Erroring here I think
     @region_hash = {}
     @map.tiles.each_with_index do |tile, index|
       coords = @map.coordinates(index)
       x, y = coords
-      next if @map.floor?(x, y)
+      #next if @map.floor?(x, y) # TODO ???
       @region_hash[coords] = get_region(x, y)
     end
-    @region_hash
   end
 
   def get_region(x, y)
     tmp_regions = Set[]
     @regions.each do |region|
-      tmp_regions << region if region.include?([x, y])
+      tmp_regions << region if region.include?([x, y]) #TODO change all these includes? to set language
     end
     tmp_regions
   end
 
+  def build_connector_hash
+    @connector_hash = {}
+    @regions.each do |region|
+      @connector_hash[region] = get_connectors(region)
+    end
+    @connector_hash
+  end
+
+  def get_connectors(region)
+    connectors = Set[]
+    return region.outer if region.is_a?(RectangularRoom) 
+    
+    region.each do |coords|
+      x, y = coords
+      connectors + get_cardinal_cell_neighbors(x, y) #TODO Erroring here
+    end
+
+    connectors
+  end
+
   def cardinal_neighbors_for_map(x, y)
-    [[x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y]] # N, S, W, E
+    Set[[x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y]] # N, S, W, E
   end
 
   def get_cardinal_cell_neighbors(x, y)
-    @neighbor_map[[x, y]]
+    @neighbor_hash[[x, y]]
   end
 
   def get_cardinal_cell_available_neighbors(x, y)
     get_cardinal_cell_neighbors(x, y).select { |n| !@visited[n] && !@map.out_of_bounds?(n[0], n[1]) }
   end
-
-  def get_all_cell_neighbors(x, y)
-    [[x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y], [x - 1, y - 1], [x + 1, y - 1], [x - 1, y + 1], [x + 1, y + 1]]
-  end 
 
   def get_next_cell(x, y, x2, y2)
     region = Set[]
@@ -181,13 +196,20 @@ class ProcGen
 
   def connect_regions
     region_hash = build_region_hash # TODO Optimize this
+    connector_hash = build_connector_hash
+    
+    curr_region = @rooms.to_a.sample
+    curr_connectors = connector_hash[curr_region]
 
-    @map.tiles.each_with_index do |tile, index|
-      x, y = @map.coordinates(index)
-      next if @map.floor?(x, y)
-      region_hash.delete([x, y]) if region_hash[[x, y]].length < 2
+    finished_regions = Set[]
+
+    @regions.each do |region|
+      curr_connectors = connector_hash[region]
+      curr_connectors.each do |connector|
+        next if region_hash[connector].length < 2
+        x, y = connector
+        @map.carve_tile(x, y)
+      end
     end
-
-    connectors = region_hash.keys
   end
 end
